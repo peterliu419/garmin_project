@@ -5,11 +5,10 @@ from datetime import datetime
 from prometheus_flask_exporter import PrometheusMetrics
 
 app = Flask(__name__)
-
 metrics = PrometheusMetrics(app)
 
 # Connect to Redis
-r = redis.Redis(host='localhost', port=6379, db=0)
+r = redis.Redis(host='127.0.0.1', port=6379, db=0)
 
 # Define the Redis list name where activity logs will be stored
 ACTIVITY_LOG_LIST = "activity_logs"
@@ -50,4 +49,4 @@ def log_activity():
     return jsonify({"message": "Activity logged successfully"}), 200
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host="0.0.0.0",port=5001)

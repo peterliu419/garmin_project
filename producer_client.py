@@ -5,7 +5,7 @@ from datetime import datetime
 import time
 
 # Flask API endpoint
-API_URL = "http://127.0.0.1:5000/log_activity"
+API_URL = "http://127.0.0.1:5001/log_activity"
 #"http://localhost:5000/log_activity"
 
 
