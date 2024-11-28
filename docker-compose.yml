@@ -1,4 +1,4 @@
-version: '3'
+version: '3.8'
 services:
   prometheus:
     image: prom/prometheus:latest
@@ -17,3 +17,25 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=garmin2024
     links:
       - prometheus
+  
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+
+  redis-exporter:
+    image: oliver006/redis_exporter:latest
+    container_name: redis-exporter
+    ports:
+      - "9121:9121"
+    environment:
+      - REDIS_ADDR=redis:6379
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
