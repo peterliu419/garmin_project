@@ -1,44 +1,23 @@
 #!/bin/bash
 
-# Define GitHub username and repository name as variables
-GITHUB_USERNAME="peterliu419"
+# Variables for your GitHub username and repository
+USERNAME="peterliu419"
 REPO_NAME="garmin_project"
 
-# Define image names using the variables
-PRODUCER_IMAGE="ghcr.io/$GITHUB_USERNAME/$REPO_NAME/producer-app:latest"
-PRODUCER_CLIENT_IMAGE="ghcr.io/$GITHUB_USERNAME/$REPO_NAME/producer-client:latest"
-CONSUMER_IMAGE="ghcr.io/$GITHUB_USERNAME/$REPO_NAME/consumer-app:latest"
-CONSUMER_CLIENT_IMAGE="ghcr.io/$GITHUB_USERNAME/$REPO_NAME/consumer-client:latest"
+# Parallel arrays for image names and their corresponding Dockerfiles
+IMAGES=("producer-app" "producer-client" "consumer-app" "consumer-client")
+DOCKERFILES=("docker/Dockerfile.producer-app" "docker/Dockerfile.producer-client" "docker/Dockerfile.consumer-app" "docker/Dockerfile.consumer-client")
 
-# Define directories where the Dockerfiles are located
-PRODUCER_DIR="./producer"
-PRODUCER_CLIENT_DIR="./producer-client"
-CONSUMER_DIR="./consumer"
-CONSUMER_CLIENT_DIR="./consumer-client"
+# Iterate through the arrays
+for ((i=0; i<${#IMAGES[@]}; i++)); do
+    IMAGE="${IMAGES[$i]}"
+    DOCKERFILE="${DOCKERFILES[$i]}"
+    echo "Building image: $IMAGE"
+    docker build -t "ghcr.io/$USERNAME/$REPO_NAME/$IMAGE:latest" -f "$DOCKERFILE" .
+    if [ $? -ne 0 ]; then
+        echo "Failed to build $IMAGE. Exiting..."
+        exit 1
+    fi
+done
 
-# Function to build and push Docker image
-build_and_push() {
-  local image_name=$1
-  local build_dir=$2
-
-  echo "Building image: $image_name"
-  docker build -t "$image_name" "$build_dir"
-
-  # Push the image to GitHub Container Registry
-  echo "Pushing image: $image_name"
-  docker push "$image_name"
-}
-
-# Build and push producer app
-build_and_push "$PRODUCER_IMAGE" "$PRODUCER_DIR"
-
-# Build and push producer client
-build_and_push "$PRODUCER_CLIENT_IMAGE" "$PRODUCER_CLIENT_DIR"
-
-# Build and push consumer app
-build_and_push "$CONSUMER_IMAGE" "$CONSUMER_DIR"
-
-# Build and push consumer client
-build_and_push "$CONSUMER_CLIENT_IMAGE" "$CONSUMER_CLIENT_DIR"
-
-echo "All images have been built and pushed successfully!"
+echo "All images built successfully!"

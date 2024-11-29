@@ -5,7 +5,7 @@ from datetime import datetime
 import time
 
 # Flask API endpoint
-API_URL = "http://producer_app:5001/log_activity"
+API_URL = "http://producer-app:5001/log_activity"
 
 # Function to generate random activity data
 def generate_random_activity():

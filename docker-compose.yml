@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   # Redis Cluster Setup (3 Nodes)
   redis-node1:

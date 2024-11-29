@@ -4,7 +4,7 @@ import requests
 import time
 
 # The URL of the consumer Flask API
-CONSUMER_API_URL = "http://consumer_app:5002/activity_logs"
+CONSUMER_API_URL = "http://consumer-app:5002/activity_logs"
 
 # Function to simulate random failure (20% chance of failure)
 def random_failure():
