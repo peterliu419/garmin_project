@@ -2,14 +2,18 @@ global:
   scrape_interval: 15s
 
 scrape_configs:
-  - job_name: 'producer'
+  - job_name: 'producer-app'
     static_configs:
-      - targets: ['host.docker.internal:5001']
+      - targets: ['producer-app:5001']
 
-  - job_name: 'consumer'
+  - job_name: 'consumer-app'
     static_configs:
-      - targets: ['host.docker.internal:5002']
+      - targets: ['consumer-app:5002']
 
-  - job_name: 'redis'
+  - job_name: 'redis-exporter'
     static_configs:
-      - targets: ['host.docker.internal:9121']
+      - targets: ['redis_exporter:9121']
+
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['prometheus:9090']

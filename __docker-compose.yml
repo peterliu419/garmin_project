@@ -1,12 +1,12 @@
 version: '3'
 
 services:
-  # Redis Cluster Setup (3 Nodes)
+  # Redis Cluster setup (3 nodes)
   redis-node1:
     image: redis:6.0
     container_name: redis-node1
     ports:
-      - "6379:6379"  # Map host port 6379 to container port 6379
+      - "6379:6379"
     command:
       - redis-server
       - "--cluster-enabled"
@@ -16,7 +16,7 @@ services:
       - "--cluster-node-timeout"
       - "5000"
     volumes:
-      - redis-data:/data  # Persist Redis data
+      - redis-data:/data
     networks:
       - app-network
 
@@ -24,7 +24,7 @@ services:
     image: redis:6.0
     container_name: redis-node2
     ports:
-      - "6380:6379"  # Map host port 6380 to container port 6379
+      - "6380:6379"
     command:
       - redis-server
       - "--cluster-enabled"
@@ -42,7 +42,7 @@ services:
     image: redis:6.0
     container_name: redis-node3
     ports:
-      - "6381:6379"  # Map host port 6381 to container port 6379
+      - "6381:6379"
     command:
       - redis-server
       - "--cluster-enabled"
@@ -56,96 +56,89 @@ services:
     networks:
       - app-network
 
-  # Prometheus Setup
+  # Prometheus setup
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
     ports:
-      - "9090:9090"  # Prometheus web interface
+      - "9090:9090"
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml  # Mount configuration file
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
     networks:
       - app-network
 
-  # Grafana Setup
+  # Grafana setup
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
     ports:
-      - "3000:3000"  # Grafana web interface
+      - "3000:3000"
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin  # Default admin password
+      - GF_SECURITY_ADMIN_PASSWORD=admin
     depends_on:
-      - prometheus  # Ensure Prometheus starts before Grafana
+      - prometheus
     networks:
       - app-network
 
-  # Producer Service Setup
+  # Producer service setup
   producer-app:
     image: ghcr.io/your-username/producer-app:latest  # Pre-built image from GHCR
     container_name: producer-app
     ports:
-      - "5001:5001"  # Producer app API
-    depends_on:
-      - redis-node1
-      - redis-node2
-      - redis-node3  # Ensure Redis nodes start first
+      - "5000:5000"  # Expose port 5000
     networks:
       - app-network
-    environment:
-      - FLASK_ENV=production  # Flask production environment
 
   producer-client:
     image: ghcr.io/your-username/producer-client:latest  # Pre-built image from GHCR
     container_name: producer-client
     depends_on:
-      - producer-app  # Ensure Producer app starts first
+      - producer-app
     networks:
       - app-network
 
-  # Consumer Service Setup
+  # Consumer service setup
   consumer-app:
     image: ghcr.io/your-username/consumer-app:latest  # Pre-built image from GHCR
     container_name: consumer-app
     ports:
-      - "5002:5002"  # Consumer app API
+      - "5001:5001"  # Expose port 5001
     depends_on:
       - redis-node1
       - redis-node2
       - redis-node3
-      - producer-app  # Ensure Redis nodes and Producer app start first
+      - producer-app
     networks:
       - app-network
-    environment:
-      - FLASK_ENV=production  # Flask production environment
 
   consumer-client:
-    image: ghcr.io/your-username/consumer-client:latest  # Pre-built image from GHCR
+    build:
+      context: .
+      dockerfile: Dockerfile.consumer_client
     container_name: consumer-client
     depends_on:
-      - consumer-app  # Ensure Consumer app starts first
+      - consumer-app
     networks:
       - app-network
 
   # Redis Exporter for Prometheus
   redis_exporter:
     image: oliver006/redis_exporter:latest
-    container_name: redis_exporter
+    container_name: redis-exporter
     environment:
-      - REDIS_ADDR=redis-node1:6379  # Monitor Redis instance
+      - REDIS_ADDR=redis-node1:6379
     ports:
-      - "9121:9121"  # Redis Exporter metrics port
+      - "9121:9121"
     depends_on:
       - redis-node1
       - redis-node2
-      - redis-node3  # Ensure Redis nodes start first
+      - redis-node3
     networks:
       - app-network
 
 networks:
   app-network:
-    driver: bridge  # Default network driver
+    driver: bridge
 
 volumes:
   redis-data:
-    # Named volume to persist Redis data

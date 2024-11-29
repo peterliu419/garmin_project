@@ -5,9 +5,7 @@ from datetime import datetime
 import time
 
 # Flask API endpoint
-API_URL = "http://127.0.0.1:5001/log_activity"
-#"http://localhost:5000/log_activity"
-
+API_URL = "http://producer_app:5001/log_activity"
 
 # Function to generate random activity data
 def generate_random_activity():
@@ -18,7 +16,7 @@ def generate_random_activity():
     activity_log = {
         "user_id": random.randint(1, 10),  # Random user ID (simulate 10 users)
         "activity_type": random.choice(activity_types),
-        "timestamp": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "timestamp": datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ"),
         "duration": random.randint(600, 3600),  # Random duration between 10 min to 1 hour
         "distance": round(random.uniform(1.0, 20.0), 2),  # Random distance (1 to 20 km)
         "heart_rate": random.randint(120, 180),  # Random heart rate

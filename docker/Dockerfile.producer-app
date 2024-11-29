@@ -1,0 +1,24 @@
+# Use a slim Python 3.9 base image
+FROM python:3.9-slim
+
+# Set the working directory inside the container
+WORKDIR /app
+
+# Copy only requirements.txt to leverage Docker cache for dependencies
+COPY requirements.txt .
+
+# Install Python dependencies
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
+RUN uv pip install --system --no-cache-dir -r requirements.txt
+
+# Copy the entire source directory
+COPY src/ ./src/
+
+# Set PYTHONPATH to include the src directory
+ENV PYTHONPATH=/app
+
+# Expose the port the Producer app runs on
+EXPOSE 5001
+
+# Command to run the Producer app
+CMD ["python", "src/producer/producer_app.py"]

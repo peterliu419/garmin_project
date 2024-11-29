@@ -1,5 +1,5 @@
 from flask import Flask, jsonify,Response
-import redis
+from rediscluster import RedisCluster
 import json
 import random
 import time
@@ -13,8 +13,15 @@ REQUEST_COUNT = Counter('request_count', 'App Request Count')
 REQUEST_LATENCY = Histogram('request_latency', 'Request latency')
 IN_PROGRESS = Gauge('in_progress', 'Number of requests in progress')
 
-# Connect to Redis
-r = redis.Redis(host='127.0.0.1', port=6379, db=0)
+# Redis Cluster Configuration
+startup_nodes = [
+    {"host": "redis-node1", "port": 6379},
+    {"host": "redis-node2", "port": 6380},
+    {"host": "redis-node3", "port": 6381}
+]
+
+# Connect to the Redis cluster
+r = RedisCluster(startup_nodes=startup_nodes, decode_responses=True)
 
 # Define the Redis list name where activity logs are stored
 ACTIVITY_LOG_LIST = "activity_logs"
