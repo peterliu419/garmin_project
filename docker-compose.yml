@@ -166,6 +166,39 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"  # Prometheus web interface
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml  # Mount configuration file
+    networks:
+      - redis-cluster-net
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"  # Grafana web interface
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin  # Default admin password
+    depends_on:
+      - prometheus
+    networks:
+      - redis-cluster-net
+
+  redis_exporter:
+    image: oliver006/redis_exporter:latest
+    container_name: redis_exporter
+    environment:
+      - REDIS_ADDR=redis-node1:6379  # Monitor Redis instance
+    ports:
+      - "9121:9121"  # Redis Exporter metrics port
+    depends_on:
+      - redis-cluster-init
+    networks:
+      - redis-cluster-net
 
 networks:
   redis-cluster-net:
