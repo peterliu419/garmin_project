@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Wait for Redis nodes to be ready
-sleep 15
+sleep 30
 
 # Resolve IP addresses
 NODE1_IP=$(getent hosts redis-node1 | awk '{ print $1 }')
@@ -15,3 +15,9 @@ redis-cli --cluster create \
   ${NODE3_IP}:6379 \
   --cluster-replicas 0 \
   --cluster-yes
+
+# Rebalance the cluster to ensure all slots are covered
+redis-cli --cluster rebalance ${NODE1_IP}:6379 --cluster-yes
+
+# Verify cluster configuration
+redis-cli --cluster info ${NODE1_IP}:6379
