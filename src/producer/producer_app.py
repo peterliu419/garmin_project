@@ -20,10 +20,13 @@ startup_nodes = [
 ]
 
 # Connect to the Redis cluster
-r = RedisCluster(startup_nodes=startup_nodes, decode_responses=True)
+r = RedisCluster(startup_nodes=startup_nodes, 
+                 decode_responses=True,
+                 skip_full_coverage_check=True
+)
 
 # Define the Redis list name where activity logs will be stored
-ACTIVITY_LOG_LIST = "activity_logs"
+ACTIVITY_LOG_LIST = "{activity_logs}"
 
 @app.route('/log_activity', methods=['POST'])
 def log_activity():
@@ -66,7 +69,14 @@ def log_activity():
 
 @app.route('/health', methods=['GET'])
 def health():
-    return "OK", 200
+    try:
+        # Simple ping to check Redis connectivity
+        r.ping()
+        return "OK", 200
+    except Exception as e:
+        # Log the error for debugging
+        app.logger.error(f"Redis health check failed: {str(e)}")
+        return "Redis cluster is not available", 503
 
 @app.route('/metrics')
 def metrics():

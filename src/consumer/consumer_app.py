@@ -21,10 +21,13 @@ startup_nodes = [
 ]
 
 # Connect to the Redis cluster
-r = RedisCluster(startup_nodes=startup_nodes, decode_responses=True)
+r = RedisCluster(startup_nodes=startup_nodes, 
+                 decode_responses=True,
+                 skip_full_coverage_check=True
+)
 
 # Define the Redis list name where activity logs are stored
-ACTIVITY_LOG_LIST = "activity_logs"
+ACTIVITY_LOG_LIST = "{activity_logs}"
 
 # Simulate random failure (e.g., 20% failure rate)
 def random_failure():
@@ -51,14 +54,22 @@ def get_activity_logs():
             return jsonify({"message": "No activity logs found"}), 404
 
         # Convert the logs from byte strings to JSON and return
-        activity_logs = [json.loads(log.decode('utf-8')) for log in logs]
+        # activity_logs = [json.loads(log.decode('utf-8')) for log in logs]
+        activity_logs = [json.loads(log if isinstance(log, str) else log.decode('utf-8')) for log in logs]
         return jsonify(activity_logs), 200
     
     IN_PROGRESS.dec()
-    
+
 @app.route('/health', methods=['GET'])
 def health():
-    return "OK", 200
+    try:
+        # Simple ping to check Redis connectivity
+        r.ping()
+        return "OK", 200
+    except Exception as e:
+        # Log the error for debugging
+        app.logger.error(f"Redis health check failed: {str(e)}")
+        return "Redis cluster is not available", 503
 
 @app.route('/metrics')
 def metrics():
