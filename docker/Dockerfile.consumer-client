@@ -9,7 +9,7 @@ COPY requirements.txt .
 
 # Install Python dependencies
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
-RUN uv pip install --system --no-cache-dir -r requirements.txt
+RUN /bin/uv pip install --system --no-cache-dir -r requirements.txt
 
 # Copy the entire source directory
 COPY src/ ./src/
@@ -17,5 +17,5 @@ COPY src/ ./src/
 # Set PYTHONPATH to include the src directory
 ENV PYTHONPATH=/app
 
-# Command to run the Consumer client
+# Command to run the Consumer client, using wait-for-it to ensure consumer-app is ready first
 CMD ["python", "src/consumer/consumer_client.py"]

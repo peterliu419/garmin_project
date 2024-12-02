@@ -9,7 +9,7 @@ COPY requirements.txt .
 
 # Install Python dependencies
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
-RUN uv pip install --system --no-cache-dir -r requirements.txt
+RUN /bin/uv pip install --system --no-cache-dir -r requirements.txt
 
 # Copy the entire source directory
 COPY src/ ./src/
@@ -20,5 +20,5 @@ ENV PYTHONPATH=/app
 # Expose the port the Consumer app runs on
 EXPOSE 5002
 
-# Command to run the Consumer app
+# Command to run the Consumer app, using wait-for-it to ensure services are ready
 CMD ["python", "src/consumer/consumer_app.py"]

@@ -89,11 +89,6 @@ services:
       - ./init-cluster.sh:/init-cluster.sh
     command: >
       sh /init-cluster.sh
-    healthcheck:
-      test: ["CMD", "redis-cli", "cluster info | grep 'cluster_state:ok'"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   producer-app:
     image: ghcr.io/peterliu419/garmin_project/producer-app:latest
@@ -101,32 +96,38 @@ services:
     ports:
       - "5001:5001"
     depends_on:
-      redis-cluster-init:
-        condition: service_healthy
+      - redis-cluster-init
     networks:
       - redis-cluster-net
     environment:
       - REDIS_HOSTS=redis-node1:6379,redis-node2:6379,redis-node3:6379
       - FLASK_ENV=production
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5001/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    entrypoint: 
+      - /bin/sh
+      - -c
+      - |
+        until redis-cli -h redis-node1 -p 6379 cluster info | grep -q "cluster_state:ok"; do
+          echo "Waiting for Redis cluster to be ready...";
+          sleep 5;
+        done
+        python src/producer/producer_app.py
 
   producer-client:
     image: ghcr.io/peterliu419/garmin_project/producer-client:latest
     container_name: producer-client
     depends_on:
-      producer-app:
-        condition: service_healthy
+      - producer-app
     networks:
       - redis-cluster-net
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://producer-app:5001/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    entrypoint: 
+      - /bin/sh
+      - -c
+      - |
+        until redis-cli -h redis-node1 -p 6379 cluster info | grep -q "cluster_state:ok"; do
+          echo "Waiting for Redis cluster to be ready...";
+          sleep 5;
+        done
+        python src/producer/producer_client.py
 
   consumer-app:
     image: ghcr.io/peterliu419/garmin_project/consumer-app:latest
@@ -134,34 +135,39 @@ services:
     ports:
       - "5002:5002"
     depends_on:
-      redis-cluster-init:
-        condition: service_healthy
-      producer-app:
-        condition: service_healthy
+      - redis-cluster-init
+      - producer-app
     networks:
       - redis-cluster-net
     environment:
       - REDIS_HOSTS=redis-node1:6379,redis-node2:6379,redis-node3:6379
       - FLASK_ENV=production
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5002/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    entrypoint: 
+      - /bin/sh
+      - -c
+      - |
+        until redis-cli -h redis-node1 -p 6379 cluster info | grep -q "cluster_state:ok"; do
+          echo "Waiting for Redis cluster to be ready...";
+          sleep 5;
+        done
+        python src/consumer/consumer_app.py
 
   consumer-client:
     image: ghcr.io/peterliu419/garmin_project/consumer-client:latest    
     container_name: consumer-client
     depends_on:
-      consumer-app:
-        condition: service_healthy
+      - consumer-app
     networks:
       - redis-cluster-net
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://consumer-app:5002/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    entrypoint: 
+      - /bin/sh
+      - -c
+      - |
+        until redis-cli -h redis-node1 -p 6379 cluster info | grep -q "cluster_state:ok"; do
+          echo "Waiting for Redis cluster to be ready...";
+          sleep 5;
+        done
+        python src/consumer/consumer_app.py
 
 networks:
   redis-cluster-net:

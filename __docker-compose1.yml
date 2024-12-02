@@ -1,0 +1,191 @@
+services:
+  redis-node1:
+    image: redis:6.0
+    hostname: redis-node1
+    container_name: redis-node1
+    ports:
+      - "6379:6379"
+    command:
+      sh -c "
+        ip_address=$(hostname -i) &&
+        redis-server \
+          --cluster-enabled yes \
+          --cluster-config-file /data/node1.conf \
+          --cluster-node-timeout 5000 \
+          --cluster-announce-ip ${ip_address} \
+          --cluster-announce-port 6379 \
+          --bind 0.0.0.0"
+    volumes:
+      - redis-node1-data:/data
+    networks:
+      app-network:
+        aliases:
+          - redis-node1
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  redis-node2:
+    image: redis:6.0
+    hostname: redis-node2
+    container_name: redis-node2
+    ports:
+      - "6380:6379"
+    command:
+      sh -c "
+        ip_address=$(hostname -i) &&
+        redis-server \
+          --cluster-enabled yes \
+          --cluster-config-file /data/node2.conf \
+          --cluster-node-timeout 5000 \
+          --cluster-announce-ip ${ip_address} \
+          --cluster-announce-port 6379 \
+          --bind 0.0.0.0"
+    volumes:
+      - redis-node2-data:/data
+    networks:
+      app-network:
+        aliases:
+          - redis-node2
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  redis-node3:
+    image: redis:6.0
+    hostname: redis-node3
+    container_name: redis-node3
+    ports:
+      - "6381:6379"
+    command:
+      sh -c "
+        ip_address=$(hostname -i) &&
+        redis-server \
+          --cluster-enabled yes \
+          --cluster-config-file /data/node3.conf \
+          --cluster-node-timeout 5000 \
+          --cluster-announce-ip ${ip_address} \
+          --cluster-announce-port 6379 \
+          --bind 0.0.0.0"
+    volumes:
+      - redis-node3-data:/data
+    networks:
+      app-network:
+        aliases:
+          - redis-node3
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+  
+  redis-cluster-init:
+    image: redis:6.0
+    container_name: redis-cluster-init
+    depends_on:
+      - redis-node1
+      - redis-node2
+      - redis-node3
+    networks:
+      - app-network
+    volumes:
+      - ./wait-for-it.sh:/usr/local/bin/wait-for-it.sh
+    command: >
+      sh -c "
+        chmod +x /usr/local/bin/wait-for-it.sh &&
+        /usr/local/bin/wait-for-it.sh redis-node1:6379 -- 
+        /usr/local/bin/wait-for-it.sh redis-node2:6379 -- 
+        /usr/local/bin/wait-for-it.sh redis-node3:6379 -- 
+        redis-cli --cluster create redis-node1:6379 redis-node2:6379 redis-node3:6379 --cluster-replicas 0 --cluster-yes
+      "
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"  # Prometheus web interface
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml  # Mount configuration file
+    networks:
+      - app-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"  # Grafana web interface
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin  # Default admin password
+    depends_on:
+      - prometheus  # Ensure Prometheus starts before Grafana
+    networks:
+      - app-network
+
+  producer-app:
+    image: ghcr.io/peterliu419/garmin_project/producer-app:latest
+    container_name: producer-app
+    ports:
+      - "5001:5001"  # Producer app API
+    depends_on:
+      - redis-cluster-init  # Ensure Redis cluster is initialized first
+    networks:
+      - app-network
+    environment:
+      - FLASK_ENV=production  # Flask production environment
+    command: ["sh", "-c", "wait-for-it redis-node1:6379 -- wait-for-it redis-node2:6380 -- wait-for-it redis-node3:6381 -- python src/producer/producer_app.py"]
+
+  producer-client:
+    image: ghcr.io/peterliu419/garmin_project/producer-client:latest
+    container_name: producer-client
+    depends_on:
+      - producer-app  # Ensure Producer app starts first
+    networks:
+      - app-network
+    command: ["sh", "-c", "wait-for-it producer-app:5001 -- python src/producer/producer_client.py"]
+
+  consumer-app:
+    image: ghcr.io/peterliu419/garmin_project/consumer-app:latest
+    container_name: consumer-app
+    ports:
+      - "5002:5002"  # Consumer app API
+    depends_on:
+      - redis-cluster-init  # Ensure Redis cluster is initialized first
+      - producer-app  # Ensure Redis nodes and Producer app start first
+    networks:
+      - app-network
+    environment:
+      - FLASK_ENV=production  # Flask production environment
+    command: ["sh", "-c", "wait-for-it redis-node1:6379 -- wait-for-it redis-node2:6380 -- wait-for-it redis-node3:6381 -- python src/consumer/consumer_app.py"]
+
+  consumer-client:
+    image: ghcr.io/peterliu419/garmin_project/consumer-client:latest    
+    container_name: consumer-client
+    depends_on:
+      - consumer-app  # Ensure Consumer app starts first
+    networks:
+      - app-network
+    command: ["sh", "-c", "wait-for-it consumer-app:5002 -- python src/consumer/consumer_client.py"]
+
+  redis_exporter:
+    image: oliver006/redis_exporter:latest
+    container_name: redis_exporter
+    environment:
+      - REDIS_ADDR=redis-node1:6379  # Monitor Redis instance
+    ports:
+      - "9121:9121"  # Redis Exporter metrics port
+    depends_on:
+      - redis-cluster-init  # Ensure Redis cluster is initialized first
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  redis-node1-data:
+  redis-node2-data:
+  redis-node3-data:

@@ -16,8 +16,8 @@ IN_PROGRESS = Gauge('in_progress', 'Number of requests in progress')
 # Redis Cluster Configuration
 startup_nodes = [
     {"host": "redis-node1", "port": 6379},
-    {"host": "redis-node2", "port": 6380},
-    {"host": "redis-node3", "port": 6381}
+    {"host": "redis-node2", "port": 6379},
+    {"host": "redis-node3", "port": 6379}
 ]
 
 # Connect to the Redis cluster
@@ -55,6 +55,10 @@ def get_activity_logs():
         return jsonify(activity_logs), 200
     
     IN_PROGRESS.dec()
+    
+@app.route('/health', methods=['GET'])
+def health():
+    return "OK", 200
 
 @app.route('/metrics')
 def metrics():
