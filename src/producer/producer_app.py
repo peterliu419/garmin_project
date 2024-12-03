@@ -8,6 +8,7 @@ import time
 import logging
 
 app = Flask(__name__)
+metrics = PrometheusMetrics(app)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

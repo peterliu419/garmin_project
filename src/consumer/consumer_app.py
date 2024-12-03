@@ -7,7 +7,8 @@ from prometheus_flask_exporter import PrometheusMetrics
 from prometheus_client import generate_latest, Counter, Gauge, Histogram
 
 app = Flask(__name__)
-# metrics = PrometheusMetrics(app)
+metrics = PrometheusMetrics(app)
+
 # Define metrics
 REQUEST_COUNT = Counter('request_count', 'App Request Count')
 REQUEST_LATENCY = Histogram('request_latency', 'Request latency')

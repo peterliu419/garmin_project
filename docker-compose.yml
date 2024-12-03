@@ -200,6 +200,18 @@ services:
     networks:
       - redis-cluster-net
 
+  cadvisor:
+    image: zcube/cadvisor:latest
+    container_name: cadvisor
+    ports:
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - redis-cluster-net
+
 networks:
   redis-cluster-net:
     driver: bridge
