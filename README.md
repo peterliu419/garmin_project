@@ -31,4 +31,4 @@ project_root/
 
 ---
 
-![Project Structure Diagram](project_structure.jpeg)
+<img src="project_structure.jpeg" alt="Project Structure Diagram" width="600">
