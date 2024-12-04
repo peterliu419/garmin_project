@@ -1,5 +1,7 @@
 ## Project Structure
+![Project Structure Diagram](project_structure.jpeg)
 
+<img src="project_structure.jpeg" alt="Project Structure Diagram" width="600">
 ```txt
 project_root/
 │
@@ -28,7 +30,3 @@ project_root/
 ├── init-cluster.sh          # Script to initialize Redis cluster
 ├── .gitignore               # Ignored files for version control
 └── README.md                # Project documentation
-
----
-
-<img src="project_structure.jpeg" alt="Project Structure Diagram" width="600">
