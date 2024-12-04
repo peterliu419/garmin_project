@@ -31,4 +31,4 @@ project_root/
 
 ---
 
-![Project Structure Diagram](./project_structure.jpeg)
+![Project Structure Diagram](project_structure.jpeg)
