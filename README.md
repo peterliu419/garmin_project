@@ -9,13 +9,10 @@ project_root/
 │   │   ├── producer_app.py  # Flask API to produce and push data to Redis
 │   │   └── producer_client.py # CLI or script to simulate producer behavior
 │   │
-│   ├── consumer/            # Consumer service: processes and aggregates data
-│   │   ├── __init__.py      # Package initialization
-│   │   ├── consumer_app.py  # Flask API to consume and aggregate data from Redis
-│   │   └── consumer_client.py # CLI or script to simulate consumer behavior
-│   │
-│   └── utils/               # Shared utility functions
-│       └── redis_controller.py # Handles Redis interactions
+│   └── consumer/            # Consumer service: processes and aggregates data
+│       ├── __init__.py      # Package initialization
+│       ├── consumer_app.py  # Flask API to consume and aggregate data from Redis
+│       └── consumer_client.py # CLI or script to simulate consumer behavior
 │
 ├── docker/                  # Docker setup for the project
 │   ├── Dockerfile.producer-app  # Dockerfile for the producer API
