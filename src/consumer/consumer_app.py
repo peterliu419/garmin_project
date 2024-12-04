@@ -1,4 +1,4 @@
-from flask import Flask, jsonify,Response
+from flask import Flask, jsonify, Response
 from rediscluster import RedisCluster
 import json
 import random
@@ -7,12 +7,35 @@ from prometheus_flask_exporter import PrometheusMetrics
 from prometheus_client import generate_latest, Counter, Gauge, Histogram
 
 app = Flask(__name__)
-metrics = PrometheusMetrics(app)
+metrics = PrometheusMetrics(app, labels={
+    'service': 'activity-consumer',
+    'application': 'flask-microservice',
+    'environment': 'production'
+})
 
-# Define metrics
-REQUEST_COUNT = Counter('request_count', 'App Request Count')
-REQUEST_LATENCY = Histogram('request_latency', 'Request latency')
-IN_PROGRESS = Gauge('in_progress', 'Number of requests in progress')
+# Metrics with Labels
+REQUEST_COUNT = Counter(
+    'request_count', 
+    'App Request Count', 
+    ['service', 'application', 'environment']
+)
+REQUEST_LATENCY = Histogram(
+    'request_latency', 
+    'Request latency', 
+    ['service', 'application', 'environment']
+)
+IN_PROGRESS = Gauge(
+    'in_progress', 
+    'Number of requests in progress', 
+    ['service', 'application', 'environment']
+)
+
+# Metric Labels
+LABELS = {
+    'service': 'activity-consumer',
+    'application': 'flask-microservice',
+    'environment': 'production'
+}
 
 # Redis Cluster Configuration
 startup_nodes = [
@@ -38,39 +61,53 @@ def random_failure():
 
 @app.route('/activity_logs', methods=['GET'])
 def get_activity_logs():
-    REQUEST_COUNT.inc()
-    with REQUEST_LATENCY.time():
-        # Introduce random delay (for simulation purposes)
-        time.sleep(random.uniform(0.5, 2))  # Random delay between 0.5 and 2 seconds
-
-        # Simulate random failure
-        if random_failure():
-            return jsonify({"error": "Random failure occurred"}), 500
-
-        # Retrieve all activity logs from Redis
-        logs = r.lrange(ACTIVITY_LOG_LIST, 0, -1)
-
-        # If no logs are found, return a 404
-        if not logs:
-            return jsonify({"message": "No activity logs found"}), 404
-
-        # Convert the logs from byte strings to JSON and return
-        # activity_logs = [json.loads(log.decode('utf-8')) for log in logs]
-        activity_logs = [json.loads(log if isinstance(log, str) else log.decode('utf-8')) for log in logs]
-        return jsonify(activity_logs), 200
+    # Increment request count
+    REQUEST_COUNT.labels(**LABELS).inc()
     
-    IN_PROGRESS.dec()
+    # Increment in-progress gauge
+    IN_PROGRESS.labels(**LABELS).inc()
 
+    try:
+        # Measure request latency
+        with REQUEST_LATENCY.labels(**LABELS).time():
+            # Introduce random delay (for simulation purposes)
+            time.sleep(random.uniform(0.5, 2))  # Random delay between 0.5 and 2 seconds
+
+            # Simulate random failure
+            if random_failure():
+                return jsonify({"error": "Random failure occurred"}), 500
+
+            # Retrieve all activity logs from Redis
+            logs = r.lrange(ACTIVITY_LOG_LIST, 0, -1)
+
+            # If no logs are found, return a 404
+            if not logs:
+                return jsonify({"message": "No activity logs found"}), 404
+
+            # Convert the logs from byte strings to JSON and return
+            activity_logs = [json.loads(log if isinstance(log, str) else log.decode('utf-8')) for log in logs]
+            return jsonify(activity_logs), 200
+
+    finally:
+        # Decrement in-progress gauge
+        IN_PROGRESS.labels(**LABELS).dec()
+    
 @app.route('/health', methods=['GET'])
 def health():
     try:
         # Simple ping to check Redis connectivity
         r.ping()
-        return "OK", 200
+        return jsonify({
+            "status": "OK", 
+            "service": "activity-consumer",
+            "environment": "production"
+        }), 200
     except Exception as e:
-        # Log the error for debugging
         app.logger.error(f"Redis health check failed: {str(e)}")
-        return "Redis cluster is not available", 503
+        return jsonify({
+            "status": "Error", 
+            "message": "Redis cluster is not available"
+        }), 503
 
 @app.route('/metrics')
 def metrics():

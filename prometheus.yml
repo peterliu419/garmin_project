@@ -5,10 +5,18 @@ scrape_configs:
   - job_name: 'producer-app'
     static_configs:
       - targets: ['producer-app:5001']
-
+        labels:
+          service: 'activity-producer'
+          application: 'flask-microservice'
+          environment: 'production'
+          
   - job_name: 'consumer-app'
     static_configs:
       - targets: ['consumer-app:5002']
+        labels:
+          service: 'activity-consumer'
+          application: 'flask-microservice'
+          environment: 'production'
 
   - job_name: 'redis-exporter'
     static_configs:

@@ -1,3 +1,6 @@
+## Project Structure
+
+```txt
 project_root/
 │
 ├── src/                     # Source code directory
