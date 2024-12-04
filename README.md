@@ -24,6 +24,11 @@ project_root/
 ├── prometheus.yml           # Configuration file for Prometheus monitoring
 ├── requirements.txt         # Python dependencies for Dockerfile configuration
 ├── build_docker_images.sh   # Script to build Docker images
+├── project_structure.jpeg  # Diagram of project structure
 ├── init-cluster.sh          # Script to initialize Redis cluster
 ├── .gitignore               # Ignored files for version control
 └── README.md                # Project documentation
+
+---
+
+![Project Structure Diagram](./project_structure.jpeg)
