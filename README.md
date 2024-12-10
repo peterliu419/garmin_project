@@ -31,19 +31,7 @@ A comprehensive monitoring system for tracking mock user activity logs using mod
 - **Prometheus**: Centralized metrics collection and monitoring
 - **Grafana**: Interactive metrics visualization and dashboarding
 
-## Deployment
-
-### Prerequisites
-- Docker
-- Docker Compose
-
-### Quick Start
-
-1. Clone the repository
-```bash
-git clone <repository-url>
-cd garmin-activity-log-monitor
-
+## Project Root
 ```txt
 project_root/
 ├── docker/                        # Docker setup for the project
@@ -71,3 +59,15 @@ project_root/
 ├── init-cluster.sh                # Script to initialize Redis cluster
 ├── .gitignore                     # Ignored files for version control
 └── README.md                      # Project documentation
+```
+### Prerequisites
+- Docker
+- Docker Compose
+
+### Quick Start
+
+1. Clone the repository
+```bash
+git clone <repository-url>
+cd garmin-activity-log-monitor
+```
