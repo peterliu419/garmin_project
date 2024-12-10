@@ -64,10 +64,26 @@ project_root/
 - Docker
 - Docker Compose
 
+## Deployment
+
+The project uses Docker Compose for local deployment, with:
+
+- Pre-built images hosted on GitHub Container Registry
+- Official images from Docker Hub for Redis, Prometheus, and Grafana
+
 ### Quick Start
 
-1. Clone the repository
+1. Initialize and run services:
+
 ```bash
-git clone <repository-url>
-cd garmin-activity-log-monitor
+docker-compose up --build
+```
+
+1. Access monitoring dashboards:
+- Prometheus: http://localhost:9090
+- Grafana: http://localhost:3000
+1. Stop services:
+
+```bash
+docker-compose down -v
 ```
