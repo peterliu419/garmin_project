@@ -1,5 +1,49 @@
-## Project Structure
+# Garmin Activity Log Monitoring System
 
+## Overview
+
+A comprehensive monitoring system for tracking Garmin user activity logs using modern distributed technologies:
+- Real-time user activity log tracking from Garmin watches
+- Distributed data storage with Redis Cluster
+- Internal log extraction and reporting capabilities
+
+## Architecture
+
+### Core Components
+
+#### Services
+- **Producer**: 
+  - Generates and processes simulated user activity data
+  - Responsible for initial log ingestion
+
+- **Consumer**: 
+  - Handles data retrieval for internal reporting
+  - Provides interfaces for log extraction
+
+- **Redis Cluster**: 
+  - 3-node distributed storage setup
+  - Ensures high availability and scalability of log data
+
+### Monitoring Infrastructure
+
+- **Redis-exporter**: Exports detailed Redis performance metrics
+- **Prometheus**: Centralized metrics collection and monitoring
+- **Grafana**: Interactive metrics visualization and dashboarding
+
+## Deployment
+
+### Prerequisites
+- Docker
+- Docker Compose
+
+### Quick Start
+
+1. Clone the repository
+```bash
+git clone <repository-url>
+cd garmin-activity-log-monitor
+
+## Project Structure
 ![Project Structure Diagram](project_structure.jpeg)
 
 ```txt
