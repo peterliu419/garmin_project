@@ -9,6 +9,7 @@ This project simulates a system that:
 - Tracks user activity logs from smart watches (Producer)
 - Stores logs in Redis Cluster
 - Allows internal users to extract logs for reporting purposes (Consumer)
+- Simulate random delay and failure
 
 ## Architecture
 
@@ -31,8 +32,8 @@ The system consists of three main components:
 
 The project uses Docker Compose for local deployment, with:
 
-- Pre-built images hosted on GitHub Container Registry
-- Official images from Docker Hub for Redis, Prometheus, and Grafana
+- Pre-built images hosted on GitHub Container Registry on this repository
+- Official images from Docker Hub for Redis, Redis Exporter, Prometheus, and Grafana
 
 ## Project Root
 ```txt
