@@ -1,13 +1,14 @@
-# Garmin Activity Log Monitoring System
+# Activity Log Monitoring System
 
 ## Overview
 
-A comprehensive monitoring system for tracking Garmin user activity logs using modern distributed technologies:
+A comprehensive monitoring system for tracking mock user activity logs using modern distributed technologies:
 - Real-time user activity log tracking from Garmin watches
 - Distributed data storage with Redis Cluster
 - Internal log extraction and reporting capabilities
 
 ## Architecture
+![Project Structure Diagram](project_structure.jpeg)
 
 ### Core Components
 
@@ -42,9 +43,6 @@ A comprehensive monitoring system for tracking Garmin user activity logs using m
 ```bash
 git clone <repository-url>
 cd garmin-activity-log-monitor
-
-## Project Structure
-![Project Structure Diagram](project_structure.jpeg)
 
 ```txt
 project_root/
