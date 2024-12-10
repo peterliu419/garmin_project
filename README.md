@@ -1,35 +1,38 @@
-# Activity Log Monitoring System
+# Smart Watch Activity Log Monitoring System
+
+A monitoring system for Smart Watch user activity logs using Redis Cluster, implemented with Flask applications and monitored through Prometheus & Grafana.
 
 ## Overview
 
-A comprehensive monitoring system for tracking mock user activity logs using modern distributed technologies:
-- Real-time user activity log tracking from Garmin watches
-- Distributed data storage with Redis Cluster
-- Internal log extraction and reporting capabilities
+This project simulates a system that:
+
+- Tracks user activity logs from smart watches (Producer)
+- Stores logs in Redis Cluster
+- Allows internal users to extract logs for reporting purposes (Consumer)
 
 ## Architecture
+
+The system consists of three main components:
 ![Project Structure Diagram](project_structure.jpeg)
 
-### Core Components
+### Core Services
 
-#### Services
-- **Producer**: 
-  - Generates and processes simulated user activity data
-  - Responsible for initial log ingestion
+- Producer: Generates and processes simulated user activity data
+- Consumer: Handles data consumption for internal users
+- Redis Cluster: 3-node setup for distributed data storage
 
-- **Consumer**: 
-  - Handles data retrieval for internal reporting
-  - Provides interfaces for log extraction
+### Monitoring Stack
 
-- **Redis Cluster**: 
-  - 3-node distributed storage setup
-  - Ensures high availability and scalability of log data
+- Redis-exporter: Exports Redis metrics
+- Prometheus: Collects and monitors service metrics
+- Grafana: Visualizes collected metrics
 
-### Monitoring Infrastructure
+## Deployment
 
-- **Redis-exporter**: Exports detailed Redis performance metrics
-- **Prometheus**: Centralized metrics collection and monitoring
-- **Grafana**: Interactive metrics visualization and dashboarding
+The project uses Docker Compose for local deployment, with:
+
+- Pre-built images hosted on GitHub Container Registry
+- Official images from Docker Hub for Redis, Prometheus, and Grafana
 
 ## Project Root
 ```txt
@@ -60,16 +63,6 @@ project_root/
 ├── .gitignore                     # Ignored files for version control
 └── README.md                      # Project documentation
 ```
-### Prerequisites
-- Docker
-- Docker Compose
-
-## Deployment
-
-The project uses Docker Compose for local deployment, with:
-
-- Pre-built images hosted on GitHub Container Registry
-- Official images from Docker Hub for Redis, Prometheus, and Grafana
 
 ### Quick Start
 
@@ -79,10 +72,10 @@ The project uses Docker Compose for local deployment, with:
 docker-compose up --build
 ```
 
-1. Access monitoring dashboards:
+2. Access monitoring dashboards:
 - Prometheus: http://localhost:9090
 - Grafana: http://localhost:3000
-1. Stop services:
+3. Stop services:
 
 ```bash
 docker-compose down -v
